@@ -1,8 +1,10 @@
 #!/bin/bash
 set -e
 
-WORK_DIR="/home/user/ubuntu-builder/work"
-OUTPUT_DIR="/home/user/ubuntu-builder/output"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+WORK_DIR="$SCRIPT_DIR/work"
+OUTPUT_DIR="$SCRIPT_DIR/output"
+mkdir -p "$OUTPUT_DIR"
 OUTPUT_ISO="$OUTPUT_DIR/custom-ubuntu.iso"
 
 echo "=== Packing Custom Ubuntu ISO ==="

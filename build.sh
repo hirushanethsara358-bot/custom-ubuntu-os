@@ -1,9 +1,10 @@
 #!/bin/bash
 set -e
 
-WORK_DIR="/home/user/ubuntu-builder/work"
-OUTPUT_DIR="/home/user/ubuntu-builder/output"
-ISO_PATH="/home/user/ubuntu-builder/ubuntu.iso"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+WORK_DIR="$SCRIPT_DIR/work"
+OUTPUT_DIR="$SCRIPT_DIR/output"
+ISO_PATH="$SCRIPT_DIR/ubuntu.iso"
 
 echo "=== Custom Ubuntu ISO Builder ==="
 
@@ -43,5 +44,3 @@ sudo mount --bind /proc "$WORK_DIR/squashfs-root/proc"
 sudo mount --bind /sys "$WORK_DIR/squashfs-root/sys"
 
 echo "Ready for customization!"
-echo "To enter chroot and customize:"
-echo "sudo chroot $WORK_DIR/squashfs-root"
