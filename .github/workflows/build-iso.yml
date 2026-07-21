@@ -1,0 +1,52 @@
+name: Build Custom Apple-Style Ubuntu ISO
+
+on:
+  push:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y squashfs-tools xorriso genisoimage rsync wget curl
+
+      - name: Download Base Ubuntu ISO (Ubuntu 24.04 LTS Live Server / Desktop)
+        run: |
+          echo "Downloading base Ubuntu ISO..."
+          # Using Ubuntu minimal/netboot or official live ISO URL
+          wget -O /tmp/ubuntu.iso "https://releases.ubuntu.com/24.04/ubuntu-24.04-live-server-amd64.iso" || \
+          wget -O /tmp/ubuntu.iso "https://releases.ubuntu.com/22.04/ubuntu-22.04.4-desktop-amd64.iso"
+          
+          # Move to builder directory
+          mkdir -p ubuntu-builder/work
+          mv /tmp/ubuntu.iso ubuntu-builder/ubuntu.iso
+
+      - name: Run Build & Customization
+        run: |
+          cd ubuntu-builder
+          chmod +x build.sh macos-customize.sh apple-deep-customizer.sh pack.sh
+          
+          # Run extraction
+          ./build.sh
+          
+          # Apply macOS customizations inside chroot
+          sudo cp macos-customize.sh apple-deep-customizer.sh work/squashfs-root/tmp/
+          sudo chroot work/squashfs-root /tmp/macos-customize.sh
+          sudo chroot work/squashfs-root /tmp/apple-deep-customizer.sh
+          
+          # Pack final ISO
+          ./pack.sh
+
+      - name: Upload Custom ISO Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: custom-apple-ubuntu-iso
+          path: ubuntu-builder/output/custom-ubuntu.iso
+          retention-days: 7
