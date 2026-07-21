@@ -17,12 +17,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y squashfs-tools xorriso genisoimage rsync wget curl
 
-      - name: Download Base Ubuntu ISO (Ubuntu 24.04 LTS Live Server / Desktop)
+      - name: Download Base Ubuntu ISO
         run: |
-          echo "Downloading base Ubuntu ISO..."
-          # Using Ubuntu minimal/netboot or official live ISO URL
-          wget -O /tmp/ubuntu.iso "https://releases.ubuntu.com/24.04/ubuntu-24.04-live-server-amd64.iso" || \
-          wget -O /tmp/ubuntu.iso "https://releases.ubuntu.com/22.04/ubuntu-22.04.4-desktop-amd64.iso"
+          echo "Finding and downloading latest Ubuntu 24.04 Live Server ISO..."
+          ISO_URL=$(curl -s https://releases.ubuntu.com/24.04/ | grep -oE "ubuntu-24\.04[^\"']+-live-server-amd64\.iso" | head -n 1)
+          if [ -z "$ISO_URL" ]; then
+            ISO_URL="https://releases.ubuntu.com/24.04/ubuntu-24.04.4-live-server-amd64.iso"
+          else
+            ISO_URL="https://releases.ubuntu.com/24.04/$ISO_URL"
+          fi
+          echo "Downloading from: $ISO_URL"
+          wget -O /tmp/ubuntu.iso "$ISO_URL"
           
           # Move to builder directory
           mkdir -p ubuntu-builder/work
